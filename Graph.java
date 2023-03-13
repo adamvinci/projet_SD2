@@ -76,59 +76,78 @@ public class Graph {
         // Sommet Courant deja parcouru HashSet pour eviter doublon + contains = o(1)
         Set<String> sommetVisite = new HashSet<>();
         // Sommet Courant LinkedHashSet pour preserver l'ordre
-        Set<String> file = new LinkedHashSet<>();
+        ArrayDeque<String> file = new ArrayDeque<>();
         // Origine de chaque sommet de la file
         Map<String, Troncon> tronconMap = new HashMap<>();
 
 
-        file.add(stationDepart);
+        file.addLast(stationDepart);
+        sommetVisite.add(stationDepart);
+
 
         String sommetCourant = null;
 
         while (!file.contains(stationArrivee)) {
-            sommetCourant = file.iterator().next();
+            sommetCourant = file.removeFirst();
             for (Troncon troncon : tronconStations.get(sommetCourant)) {
                 if (!sommetVisite.contains(troncon.getArrivee())) {
-                    file.add(troncon.getArrivee());
+                    file.addLast(troncon.getArrivee());
                     tronconMap.putIfAbsent(troncon.getArrivee(), troncon);
+                    sommetVisite.add(troncon.getArrivee());
                 }
 
             }
-            file.remove(sommetCourant);
-            sommetVisite.add(sommetCourant);
             if(file.isEmpty()){
                 System.out.println("Pas de route entre"+stationDepart+" et "+stationArrivee);
                 System.exit(1);
             }
         }
 
-        System.out.println(
-            "Le chemin le plus court pour aller de " + stationDepart + " a " + stationArrivee
-                + " est le suivant");
 
-        List<Troncon> cheminTroncon = new LinkedList<>();
-        cheminTroncon.add(tronconMap.get(stationArrivee));
+            System.out.println(
+                    "Le chemin le plus court pour aller de " + stationDepart + " a " + stationArrivee
+                            + " est le suivant");
 
-        while (!sommetCourant.equals(stationDepart)) {
-            for (Troncon troncon : tronconMap.values()) {
-                if (troncon.getArrivee().equals(sommetCourant)) {
-                    sommetCourant = troncon.getDepart();
-                    cheminTroncon.add(troncon);
-                    break;
+            List<Troncon> cheminTroncon = new LinkedList<>();
+            cheminTroncon.add(tronconMap.get(stationArrivee));
+
+            while (!sommetCourant.equals(stationDepart)) {
+                for (Troncon troncon : tronconMap.values()) {
+                    if (troncon.getArrivee().equals(sommetCourant)) {
+                        sommetCourant = troncon.getDepart();
+                        cheminTroncon.add(troncon);
+                        break;
+                    }
+
                 }
-
             }
+
+            ListIterator<Troncon> iterator = cheminTroncon.listIterator(cheminTroncon.size());
+
+            while (iterator.hasPrevious()) {
+                System.out.println(iterator.previous());
+            }
+            System.out.println("nbTroncons = "+cheminTroncon.size());
+            int dureeTransport = cheminTroncon.stream().map(Troncon::getDuree)
+                    .reduce(0, Integer::sum);
+            System.out.println("dureeTransport = "+ dureeTransport);
+
+            int dureeTotale =cheminTroncon.get(0).getLigne().getAttenteMoyenne();;
+            int idLigne = cheminTroncon.get(0).getLigne().getId();
+            for(Troncon troncon:cheminTroncon){
+                if(troncon.getLigne().getId() != idLigne){
+                    idLigne = troncon.getLigne().getId();
+                    dureeTotale+= troncon.getLigne().getAttenteMoyenne();
+                }
+            }
+
+            dureeTotale+=dureeTransport;
+            System.out.println("durreeTotale = "+ dureeTotale);
         }
 
-        ListIterator<Troncon> iterator = cheminTroncon.listIterator(cheminTroncon.size());
 
-        while (iterator.hasPrevious()) {
-            System.out.println(iterator.previous());
-        }
-        System.out.println("nbTroncons = "+cheminTroncon.size());
-        System.out.println("dureeTransport = "+ cheminTroncon.stream().map(Troncon::getDuree)
-            .reduce(0, Integer::sum));
-    }
+
+
 
     //Dijkstra
     public void calculerCheminMinimisantTempsTransport(String stationDepart, String stationArrivee) {
