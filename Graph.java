@@ -1,17 +1,6 @@
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class Graph {
     private HashSet<Troncon> troncons;
@@ -152,6 +141,36 @@ public class Graph {
     //Dijkstra Provisoire TreeMap(pour le minimum) hashmap pour definitif
     public void calculerCheminMinimisantTempsTransport(String stationDepart, String stationArrivee) {
 
-        HashMap<String,Integer> stringIntegerHashMap=new HashMap<>(C)
+        //HashMap<String,Integer> stringIntegerHashMap=new HashMap<>(C);
+        HashMap<String,Integer> EtiquettesDefinitives=new HashMap<>();
+        TreeMap<String,Integer> EtiquettesProvisoires=new TreeMap<>();
+
+        ArrayDeque<String> file = new ArrayDeque<>();
+
+        String station=stationDepart;
+        while(!file.contains(stationArrivee)){
+            //enregistrer les stations adjacents
+            for (Troncon troncon : tronconStations.get(station)) {
+
+                station=troncon.getDepart();
+
+                //quand on sort du point de depart
+                if(EtiquettesProvisoires.containsKey(troncon.getDepart())){
+                    if(!EtiquettesProvisoires.containsKey(troncon.getArrivee()) || EtiquettesProvisoires.get(station)>troncon.getDuree()){
+                        EtiquettesProvisoires.put(stationArrivee,EtiquettesProvisoires.get(station)+troncon.getDuree());
+                    }
+                }
+                //quand on est a peine au debut
+                else{
+                    if(!EtiquettesProvisoires.containsKey(troncon.getArrivee()) || EtiquettesProvisoires.get(station)>troncon.getDuree()){
+                        EtiquettesProvisoires.put(stationArrivee,troncon.getDuree());
+                    }
+                }
+
+            }
+        }
+
+
+
     }
 }
