@@ -102,15 +102,15 @@ public class Graph {
 
   //Dijkstra Provisoire TreeMap(pour le minimum) hashmap pour definitif
   public void calculerCheminMinimisantTempsTransport(String stationDepart, String stationArrivee) {
-
-    // Set parce que on a pas besoin de savoir quel duree min est associe a quel sommet
-    Set<String> etiquetteDefinitif = new HashSet<>();
     // HashMap<String,String> pour retracer le chemin qui peux changer a chaque parcours de minimum
     Map<String, Troncon> tronconMap = new HashMap<>();
 
-    TreeMap<String, Integer> etiquettesProvisoires = new TreeMap<>();
+    // Set parce que on a pas besoin de savoir quel duree min est associe a quel sommet
+    Set<String> etiquetteDefinitif = new HashSet<>();
+
+    HashMap<String, Integer> etiquettesProvisoires = new HashMap<>();
     // Comparator pour prendre le first qui est le minimum
-    TreeMap<String, Integer> sortedMap = new TreeMap<>(new Comparator<String>() {
+    TreeSet<String> sortedMap = new TreeSet<>(new Comparator<String>() {
       @Override
       public int compare(String s1, String s2) {
         int value1 = etiquettesProvisoires.get(s1);
@@ -124,25 +124,35 @@ public class Graph {
     });
 
     etiquettesProvisoires.put(stationDepart, 0);
-    sortedMap.putAll(etiquettesProvisoires);
-    String minValue = null;
+    sortedMap.add(stationDepart);
     while (!sortedMap.isEmpty()) {
-      minValue = sortedMap.firstKey();
+      String minValue = sortedMap.pollFirst();
+      etiquetteDefinitif.add(minValue);
       for (Troncon troncon : tronconStations.get(minValue)) {
-        int duree = etiquettesProvisoires.get(minValue) + troncon.getDuree();
-        if (!etiquetteDefinitif.contains(troncon.getArrivee()) && (
-            etiquettesProvisoires.get(troncon.getArrivee()) == null ||
-                etiquettesProvisoires.get(troncon.getArrivee()) > duree)) {
-          etiquettesProvisoires.put(troncon.getArrivee(), duree);
-          tronconMap.put(troncon.getArrivee(), troncon);
+        if (!etiquetteDefinitif.contains(troncon.getArrivee())){
+          int duree = etiquettesProvisoires.get(minValue) + troncon.getDuree();
+          if( etiquettesProvisoires.get(troncon.getArrivee()) == null || etiquettesProvisoires.get(troncon.getArrivee()) > duree) {
+
+              try {
+                sortedMap.remove(troncon.getArrivee());
+              } catch (NullPointerException e){
+                e.getMessage();
+              }
+
+
+            etiquettesProvisoires.put(troncon.getArrivee(), duree);
+            sortedMap.add(troncon.getArrivee());
+            tronconMap.put(troncon.getArrivee(), troncon);
+          }
         }
+
+
+        }
+      etiquettesProvisoires.remove(minValue);
       }
 
-      etiquetteDefinitif.add(minValue);
-      etiquettesProvisoires.remove(minValue);
-      sortedMap.clear();
-      sortedMap.putAll(etiquettesProvisoires);
-    }
+
+
 
     // tronconMap.get(stationArrivee).getDepart() et pas minValue parce que sinon il va remonter le chemin depuis la derniere station
     // qui etait dans sorted map vu que dans le bfs la derniere station de la file est celle qui relie directement au
