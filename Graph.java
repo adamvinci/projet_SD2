@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 
 public class Graph {
 
-    private HashSet<Troncon> troncons;
+
     private ArrayList<Ligne> lignes1;
 
     private HashMap<String, HashSet<Troncon>> tronconStations;
 
     public Graph(File lignes, File tronconFile) {
-        troncons = new HashSet<>();
+
         lignes1 = new ArrayList<>();
         tronconStations = new HashMap<String, HashSet<Troncon>>();
 
@@ -52,7 +52,6 @@ public class Graph {
                 int dureeTroncon = Integer.parseInt(data[3]);
                 Troncon tr = new Troncon(departTroncon, arriveeTroncon, dureeTroncon,
                         lignes1.get(numeroLigne - 1));
-                troncons.add(tr);
                 tronconStations.computeIfAbsent(departTroncon, k -> new HashSet<>()).add(tr);
             }
 
@@ -102,7 +101,7 @@ public class Graph {
     }
 
 
-    //Dijkstra Provisoire TreeMap(pour le minimum) hashmap pour definitif
+    //Dijkstra Provisoire TreeMap(pour le minimum) hashset pour definitif
     public void calculerCheminMinimisantTempsTransport(String stationDepart, String stationArrivee) {
         // HashMap<String,String> pour retracer le chemin qui peux changer a chaque parcours de minimum
         Map<String, Troncon> tronconMap = new HashMap<>();
